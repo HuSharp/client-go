@@ -63,4 +63,4 @@ require (
 	stathat.com/c/consistent v1.0.0 // indirect
 )
 
-replace github.com/tikv/pd/client => github.com/HuSharp/pd/client v0.0.0-20230302163825-a621af225075
+replace github.com/tikv/pd/client => github.com/HuSharp/pd/client v0.0.0-20230302161805-2196b4d182c5
