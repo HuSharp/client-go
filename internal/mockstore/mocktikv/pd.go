@@ -37,12 +37,12 @@ package mocktikv
 import (
 	"context"
 	"fmt"
+	"github.com/pingcap/kvproto/pkg/meta_storagepb"
 	"math"
 	"sync"
 	"time"
 
 	"github.com/pingcap/kvproto/pkg/keyspacepb"
-	"github.com/pingcap/kvproto/pkg/meta_storagepb"
 	"github.com/pingcap/kvproto/pkg/metapb"
 	"github.com/pingcap/kvproto/pkg/pdpb"
 	rmpb "github.com/pingcap/kvproto/pkg/resource_manager"
@@ -69,6 +69,18 @@ type pdClient struct {
 	gcSafePointMu     sync.Mutex
 
 	externalTimestamp atomic.Uint64
+}
+
+func (c *pdClient) Watch(ctx context.Context, key []byte, opts ...pd.OpOption) (chan []*meta_storagepb.Event, error) {
+	return nil, nil
+}
+
+func (c *pdClient) Get(ctx context.Context, key []byte, opts ...pd.OpOption) (*meta_storagepb.GetResponse, error) {
+	return nil, nil
+}
+
+func (c *pdClient) Put(ctx context.Context, key []byte, value []byte, opts ...pd.OpOption) (*meta_storagepb.PutResponse, error) {
+	return nil, nil
 }
 
 // NewPDClient creates a mock pd.Client that uses local timestamp and meta data
@@ -341,16 +353,4 @@ func (c *pdClient) GetLocalTSWithinKeyspace(ctx context.Context, dcLocation stri
 
 func (c *pdClient) GetLocalTSWithinKeyspaceAsync(ctx context.Context, dcLocation string, keyspaceID uint32) pd.TSFuture {
 	return nil
-}
-
-func (c *pdClient) Watch(ctx context.Context, key []byte, opts ...pd.OpOption) (chan []*meta_storagepb.Event, error) {
-	return nil, nil
-}
-
-func (c *pdClient) Get(ctx context.Context, key []byte, opts ...pd.OpOption) (*meta_storagepb.GetResponse, error) {
-	return nil, nil
-}
-
-func (c *pdClient) Put(ctx context.Context, key []byte, value []byte, opts ...pd.OpOption) (*meta_storagepb.PutResponse, error) {
-	return nil, nil
 }
