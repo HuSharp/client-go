@@ -138,6 +138,7 @@ func newConnArray(maxSize uint, addr string, security config.Security,
 }
 
 func (a *connArray) Init(addr string, security config.Security, idleNotify *uint32, enableBatch bool, opts ...grpc.DialOption) error {
+	logutil.BgLogger().Info("[rpc check] Init", zap.String("to", addr), zap.Bool("enableBatch", enableBatch))
 	a.target = addr
 
 	opt := grpc.WithTransportCredentials(insecure.NewCredentials())
@@ -309,6 +310,7 @@ func NewRPCClient(opts ...Opt) *RPCClient {
 }
 
 func (c *RPCClient) getConnArray(addr string, enableBatch bool, opt ...func(cfg *config.TiKVClient)) (*connArray, error) {
+	logutil.BgLogger().Info("[rpc check] getConnArray", zap.String("to", addr), zap.Bool("enableBatch", enableBatch))
 	c.RLock()
 	if c.isClosed {
 		c.RUnlock()
@@ -334,6 +336,7 @@ func (c *RPCClient) getConnArray(addr string, enableBatch bool, opt ...func(cfg 
 }
 
 func (c *RPCClient) createConnArray(addr string, enableBatch bool, opts ...func(cfg *config.TiKVClient)) (*connArray, error) {
+	logutil.BgLogger().Info("[rpc check] create new connection", zap.String("to", addr), zap.Bool("enableBatch", enableBatch))
 	c.Lock()
 	defer c.Unlock()
 	array, ok := c.conns[addr]

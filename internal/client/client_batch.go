@@ -297,6 +297,7 @@ func (a *batchConn) fetchMorePendingRequests(
 const idleTimeout = 3 * time.Minute
 
 func (a *batchConn) batchSendLoop(cfg config.TiKVClient) {
+	logutil.BgLogger().Info("[rpc check] batchSendLoop")
 	defer func() {
 		if r := recover(); r != nil {
 			metrics.TiKVPanicCounter.WithLabelValues(metrics.LabelBatchSendLoop).Inc()
@@ -606,7 +607,7 @@ func (c *batchCommandsClient) batchRecvLoop(cfg config.TiKVClient, tikvTransport
 			if c.isStopped() {
 				return
 			}
-			logutil.BgLogger().Debug(
+			logutil.BgLogger().Info(
 				"batchRecvLoop fails when receiving, needs to reconnect",
 				zap.String("target", c.target),
 				zap.String("forwardedHost", streamClient.forwardedHost),
@@ -716,6 +717,7 @@ func (c *batchCommandsClient) newBatchStream(forwardedHost string) (*batchComman
 }
 
 func (c *batchCommandsClient) initBatchClient(forwardedHost string) error {
+	logutil.BgLogger().Info("init batch commands client", zap.String("forwardedHost", forwardedHost))
 	if forwardedHost == "" && c.client != nil {
 		return nil
 	}

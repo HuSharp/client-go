@@ -562,6 +562,7 @@ func (s *KVStore) updateSafeTS(ctx context.Context) {
 			if s.pdHttpClient != nil {
 				safeTS, err = s.pdHttpClient.GetStoreMinResolvedTS(ctx, storeID)
 				if err != nil {
+					metrics.TiKVSafeTSUpdateCounter.WithLabelValues("fail", storeIDStr).Inc()
 					logutil.BgLogger().Debug("get resolved TS from PD failed", zap.Error(err), zap.Uint64("store-id", storeID))
 				}
 			}
