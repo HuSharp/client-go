@@ -500,6 +500,9 @@ func (s *KVStore) GetTiKVClient() (client Client) {
 // GetMinSafeTS return the minimal safeTS of the storage with given txnScope.
 func (s *KVStore) GetMinSafeTS(txnScope string) uint64 {
 	if val, ok := s.minSafeTS.Load(txnScope); ok {
+		if val.(uint64) == uint64(math.MaxUint64) {
+			return 0
+		}
 		return val.(uint64)
 	}
 	return 0
@@ -660,6 +663,7 @@ func (s *KVStore) setClusterMinSafeTSByPD(ctx context.Context) bool {
 	// Try to get the minimum resolved timestamp of the cluster from PD.
 	if s.pdHttpClient != nil && isGlobal {
 		clusterMinSafeTS, err := s.pdHttpClient.GetClusterMinResolvedTS(ctx)
+		logutil.BgLogger().Info("get cluster-level min resolved timestamp from PD", zap.Uint64("min-resolved-ts", clusterMinSafeTS), zap.Error(err))
 		if err != nil {
 			logutil.BgLogger().Debug("get cluster-level min resolved timestamp from PD failed", zap.Error(err))
 		} else if clusterMinSafeTS != 0 {
@@ -669,12 +673,15 @@ func (s *KVStore) setClusterMinSafeTSByPD(ctx context.Context) bool {
 				skipClusterSafeTSUpdateCounter.Inc()
 				preSafeTSTime := oracle.GetTimeFromTS(preClusterMinSafeTS)
 				clusterMinSafeTSGap.Set(time.Since(preSafeTSTime).Seconds())
+				logutil.BgLogger().Info("skip update cluster-level min resolved timestamp", zap.Uint64("pre-min-resolved-ts", preClusterMinSafeTS), zap.Uint64("min-resolved-ts", clusterMinSafeTS))
 			} else {
 				s.minSafeTS.Store(oracle.GlobalTxnScope, clusterMinSafeTS)
 				successClusterSafeTSUpdateCounter.Inc()
 				safeTSTime := oracle.GetTimeFromTS(clusterMinSafeTS)
 				clusterMinSafeTSGap.Set(time.Since(safeTSTime).Seconds())
+				logutil.BgLogger().Info("update cluster-level min resolved timestamp", zap.Uint64("min-resolved-ts", clusterMinSafeTS))
 			}
+
 			return true
 		}
 	}
